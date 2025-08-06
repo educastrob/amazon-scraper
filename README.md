@@ -124,7 +124,3 @@ O sistema identifica e reporta quando dados não podem ser extraídos:
 - **Avaliações**: "Avaliação não disponível"
 - **Imagens**: "Imagem não disponível"
 - **Links**: "Link do produto não encontrado"
-
-## Aviso Legal
-
-Este projeto é apenas para fins educacionais. O web scraping pode violar os Termos de Serviço da Amazon. Use com responsabilidade e respeite os limites de rate limiting.

@@ -1,0 +1,23 @@
+{
+  "name": "amazon-scraper-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Amazon product scraper",
+  "main": "index.js",
+  "scripts": {
+    "dev": "bun --watch index.js",
+    "start": "bun index.js",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "jsdom": "^23.0.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "user-agents": "^1.0.1354"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+} 

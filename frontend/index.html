@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Product Scraper</title>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-search"></i>
+                    <h1>Amazon Scraper</h1>
+                </div>
+                <p class="subtitle">Extraia produtos da Amazon de forma rápida e eficiente</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input 
+                            type="text" 
+                            id="keywordInput" 
+                            placeholder="Digite o produto que deseja buscar..."
+                            class="search-input"
+                        >
+                        <button id="searchBtn" class="search-button">
+                            <i class="fas fa-rocket"></i>
+                            <span>Buscar</span>
+                        </button>
+                    </div>
+                    <div class="search-tips">
+                        <p><i class="fas fa-lightbulb"></i> Dica: Use termos específicos como "laptop gaming" ou "smartphone samsung"</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section id="loadingSection" class="loading-section hidden">
+                <div class="loading-container">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <h3>Buscando produtos...</h3>
+                    <p>Isso pode levar alguns segundos. Por favor, aguarde.</p>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <div class="results-header">
+                    <h2 id="resultsTitle">Resultados da Busca</h2>
+                    <div class="results-stats">
+                        <span id="resultsCount" class="results-count">0 produtos encontrados</span>
+                        <span id="searchTime" class="search-time"></span>
+                    </div>
+                </div>
+
+                <div id="productsGrid" class="products-grid">
+                    <!-- Products will be inserted here -->
+                </div>
+
+                <div id="noResults" class="no-results hidden">
+                    <i class="fas fa-search"></i>
+                    <h3>Nenhum produto encontrado</h3>
+                    <p>Tente usar termos diferentes ou verifique sua conexão com a internet.</p>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section id="errorSection" class="error-section hidden">
+                <div class="error-container">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3 id="errorTitle">Erro na busca</h3>
+                    <p id="errorMessage">Ocorreu um erro ao buscar os produtos.</p>
+                    <button id="retryBtn" class="retry-button">
+                        <i class="fas fa-redo"></i>
+                        Tentar Novamente
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Amazon Scraper. Desenvolvido com ❤️ usando Bun e Vite.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Sobre</a>
+                    <a href="#" class="footer-link">Privacidade</a>
+                    <a href="#" class="footer-link">Termos</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Detalhes do Produto</h3>
+                <button id="closeModal" class="close-button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <!-- Modal content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html> 

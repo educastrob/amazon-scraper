@@ -190,6 +190,7 @@ class AmazonScraperApp {
         const ratingDisplay = this.formatRatingDisplay(product.rating, product.errors?.rating);
         const reviewsDisplay = this.formatReviewsDisplay(product.reviewCount, product.errors?.reviewCount);
         const imageDisplay = this.formatImageDisplay(product.imageUrl, product.errors?.imageUrl);
+        const linkDisplay = this.formatLinkDisplay(product.productUrl, product.errors?.productUrl);
         
         card.innerHTML = `
             <div class="product-image">
@@ -207,7 +208,7 @@ class AmazonScraperApp {
                     ${priceDisplay}
                 </div>
                 ${product.availability ? `<div class="product-availability">${product.availability}</div>` : ''}
-                ${product.productUrl ? `<a href="${product.productUrl}" target="_blank" class="product-link">Ver na Amazon</a>` : ''}
+                ${linkDisplay}
             </div>
         `;
         
@@ -228,13 +229,32 @@ class AmazonScraperApp {
 
     formatPriceDisplay(price, originalPrice) {
         if (price) {
-            let priceHtml = `<div class="current-price">${price}</div>`;
+            let priceHtml = `<div class="current-price">${this.convertToUSD(price)}</div>`;
             if (originalPrice && originalPrice !== price) {
-                priceHtml += `<div class="original-price">${originalPrice}</div>`;
+                priceHtml += `<div class="original-price">${this.convertToUSD(originalPrice)}</div>`;
             }
             return priceHtml;
         }
         return '<div class="price-error">Preço não disponível</div>';
+    }
+
+    convertToUSD(priceString) {
+        if (!priceString) return priceString;
+        
+        const numericValue = priceString.replace(/[^\d.,]/g, '');
+        const priceMatch = numericValue.match(/(\d+(?:[.,]\d+)?)/);
+        
+        if (priceMatch) {
+            const price = parseFloat(priceMatch[1].replace(',', '.'));
+            if (!isNaN(price)) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(price);
+            }
+        }
+        
+        return priceString.replace('R$', 'US$');
     }
 
     formatRatingDisplay(rating, error) {
@@ -262,6 +282,22 @@ class AmazonScraperApp {
         return '<i class="fas fa-image"></i><div class="image-error">Imagem não disponível</div>';
     }
 
+    formatLinkDisplay(productUrl, error) {
+        if (productUrl && this.isValidUrl(productUrl)) {
+            return `<a href="${productUrl}" target="_blank" class="product-link">Ver na Amazon</a>`;
+        }
+        return '<button class="product-link-error" disabled>Não foi possível carregar URL</button>';
+    }
+
+    isValidUrl(string) {
+        try {
+            const url = new URL(string);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch (_) {
+            return false;
+        }
+    }
+
     generateStars(rating) {
         if (rating <= 0) return '<i class="far fa-star"></i>'.repeat(5);
         
@@ -284,6 +320,7 @@ class AmazonScraperApp {
         const priceDisplay = this.formatPriceDisplay(product.price, product.originalPrice);
         const ratingDisplay = this.formatRatingDisplay(product.rating, product.errors?.rating);
         const reviewsDisplay = this.formatReviewsDisplay(product.reviewCount, product.errors?.reviewCount);
+        const linkDisplay = this.formatLinkDisplay(product.productUrl, product.errors?.productUrl);
         
         this.elements.modalContent.innerHTML = `
             <div class="modal-product">
@@ -302,7 +339,7 @@ class AmazonScraperApp {
                     ${product.availability ? `<p><strong>Disponibilidade:</strong> ${product.availability}</p>` : ''}
                     <p><strong>ID:</strong> ${product.id}</p>
                     <p><strong>Data de extração:</strong> ${new Date(product.timestamp).toLocaleString('pt-BR')}</p>
-                    ${product.productUrl ? `<a href="${product.productUrl}" target="_blank" class="modal-product-link">Ver na Amazon</a>` : ''}
+                    ${linkDisplay}
                 </div>
             </div>
         `;

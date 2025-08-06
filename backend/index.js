@@ -95,6 +95,17 @@ function formatPrice(priceText) {
   return null;
 }
 
+function isValidProductUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  
+  try {
+    const urlObj = new URL(url.startsWith('http') ? url : `https://www.amazon.com${url}`);
+    return urlObj.hostname.includes('amazon') && urlObj.pathname.includes('/dp/');
+  } catch (error) {
+    return false;
+  }
+}
+
 function extractProducts(dom) {
   const products = [];
   
@@ -124,11 +135,14 @@ function extractProducts(dom) {
       
       const title = titleElement ? titleElement.textContent.trim() : null;
 
-      const linkElement = element.querySelector('h2 a') || element.querySelector('a[href*="/dp/"]');
+      const linkElement = element.querySelector('h2 a') || 
+                         element.querySelector('a[href*="/dp/"]') ||
+                         element.querySelector('a[data-asin]');
+      
       let productUrl = '';
       if (linkElement) {
         const href = linkElement.getAttribute('href');
-        if (href) {
+        if (href && isValidProductUrl(href)) {
           productUrl = href.startsWith('http') ? href : `https://www.amazon.com${href}`;
         }
       }

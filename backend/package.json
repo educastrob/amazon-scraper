@@ -4,8 +4,8 @@
   "description": "Backend server for Amazon product scraper",
   "main": "index.js",
   "scripts": {
-    "dev": "bun --watch index.js",
-    "start": "bun index.js",
+    "dev": "bun install && bun index.js",
+    "start": "bun --watch index.js",
     "test": "bun test"
   },
   "dependencies": {

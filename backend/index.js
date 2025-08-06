@@ -76,6 +76,25 @@ async function makeRequest(url, maxRetries = 3) {
   }
 }
 
+function formatPrice(priceText) {
+  if (!priceText) return null;
+  
+  const cleanPrice = priceText.replace(/[^\d.,]/g, '');
+  const priceMatch = cleanPrice.match(/(\d+(?:[.,]\d+)?)/);
+  
+  if (priceMatch) {
+    const price = parseFloat(priceMatch[1].replace(',', '.'));
+    if (!isNaN(price)) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(price);
+    }
+  }
+  
+  return null;
+}
+
 function extractProducts(dom) {
   const products = [];
   
@@ -103,7 +122,16 @@ function extractProducts(dom) {
                           element.querySelector('.a-size-base-plus') ||
                           element.querySelector('h2');
       
-      const title = titleElement ? titleElement.textContent.trim() : 'Título não disponível';
+      const title = titleElement ? titleElement.textContent.trim() : null;
+
+      const linkElement = element.querySelector('h2 a') || element.querySelector('a[href*="/dp/"]');
+      let productUrl = '';
+      if (linkElement) {
+        const href = linkElement.getAttribute('href');
+        if (href) {
+          productUrl = href.startsWith('http') ? href : `https://www.amazon.com${href}`;
+        }
+      }
 
       const imgElement = element.querySelector('img[src]') || 
                         element.querySelector('img[data-src]');
@@ -123,7 +151,7 @@ function extractProducts(dom) {
                            element.querySelector('[aria-label*="stars"]') ||
                            element.querySelector('.a-icon-star');
       
-      let rating = 0;
+      let rating = null;
       if (ratingElement) {
         const ratingText = ratingElement.textContent || ratingElement.getAttribute('aria-label') || '';
         const ratingMatch = ratingText.match(/(\d+(?:\.\d+)?)/);
@@ -136,7 +164,7 @@ function extractProducts(dom) {
                             element.querySelector('[aria-label*="reviews"]') ||
                             element.querySelector('.a-size-base.s-underline-text');
       
-      let reviewCount = 0;
+      let reviewCount = null;
       if (reviewsElement) {
         const reviewsText = reviewsElement.textContent || '';
         const reviewsMatch = reviewsText.match(/(\d+(?:,\d+)*)/);
@@ -147,14 +175,31 @@ function extractProducts(dom) {
 
       const priceElement = element.querySelector('.a-price-whole') ||
                           element.querySelector('.a-price .a-offscreen') ||
-                          element.querySelector('.a-price');
+                          element.querySelector('.a-price') ||
+                          element.querySelector('.a-color-price');
       
-      let price = '';
+      let price = null;
+      let originalPrice = null;
       if (priceElement) {
-        price = priceElement.textContent.trim();
+        const priceText = priceElement.textContent.trim();
+        price = formatPrice(priceText);
+        
+        const originalPriceElement = element.querySelector('.a-text-strike') ||
+                                   element.querySelector('.a-price.a-text-price .a-offscreen');
+        if (originalPriceElement) {
+          const originalPriceText = originalPriceElement.textContent.trim();
+          originalPrice = formatPrice(originalPriceText);
+        }
       }
 
-      if (title && title !== 'Título não disponível') {
+      const availabilityElement = element.querySelector('.a-color-success') ||
+                                element.querySelector('.a-color-price');
+      let availability = null;
+      if (availabilityElement) {
+        availability = availabilityElement.textContent.trim();
+      }
+
+      if (title) {
         products.push({
           id: index + 1,
           title,
@@ -162,7 +207,18 @@ function extractProducts(dom) {
           reviewCount,
           imageUrl,
           price,
-          timestamp: new Date().toISOString()
+          originalPrice,
+          availability,
+          productUrl,
+          timestamp: new Date().toISOString(),
+          errors: {
+            title: !title ? 'Título não encontrado' : null,
+            rating: rating === null ? 'Avaliação não encontrada' : null,
+            reviewCount: reviewCount === null ? 'Número de avaliações não encontrado' : null,
+            imageUrl: !imageUrl ? 'Imagem não encontrada' : null,
+            price: price === null ? 'Preço não encontrado' : null,
+            productUrl: !productUrl ? 'Link do produto não encontrado' : null
+          }
         });
       }
     } catch (error) {

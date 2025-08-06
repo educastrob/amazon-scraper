@@ -186,31 +186,80 @@ class AmazonScraperApp {
         
         const stars = this.generateStars(product.rating);
         
+        const priceDisplay = this.formatPriceDisplay(product.price, product.originalPrice);
+        const ratingDisplay = this.formatRatingDisplay(product.rating, product.errors?.rating);
+        const reviewsDisplay = this.formatReviewsDisplay(product.reviewCount, product.errors?.reviewCount);
+        const imageDisplay = this.formatImageDisplay(product.imageUrl, product.errors?.imageUrl);
+        
         card.innerHTML = `
             <div class="product-image">
-                ${product.imageUrl ? 
-                    `<img src="${product.imageUrl}" alt="${product.title}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>';">` : 
-                    '<i class="fas fa-image"></i>'
-                }
+                ${imageDisplay}
             </div>
             <div class="product-info">
                 <h3 class="product-title">${this.escapeHtml(product.title)}</h3>
                 <div class="product-rating">
-                    <span class="stars">${stars}</span>
-                    <span class="rating-text">${product.rating > 0 ? `${product.rating}/5` : 'Sem avaliação'}</span>
+                    ${ratingDisplay}
                 </div>
                 <div class="product-reviews">
-                    ${product.reviewCount > 0 ? `${this.formatNumber(product.reviewCount)} avaliações` : 'Sem avaliações'}
+                    ${reviewsDisplay}
                 </div>
-                ${product.price ? `<div class="product-price">${product.price}</div>` : ''}
+                <div class="product-price">
+                    ${priceDisplay}
+                </div>
+                ${product.availability ? `<div class="product-availability">${product.availability}</div>` : ''}
+                ${product.productUrl ? `<a href="${product.productUrl}" target="_blank" class="product-link">Ver na Amazon</a>` : ''}
             </div>
         `;
         
-        card.addEventListener('click', () => {
-            this.openProductModal(product);
-        });
+        if (product.productUrl) {
+            card.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('product-link')) {
+                    this.openProductModal(product);
+                }
+            });
+        } else {
+            card.addEventListener('click', () => {
+                this.openProductModal(product);
+            });
+        }
         
         return card;
+    }
+
+    formatPriceDisplay(price, originalPrice) {
+        if (price) {
+            let priceHtml = `<div class="current-price">${price}</div>`;
+            if (originalPrice && originalPrice !== price) {
+                priceHtml += `<div class="original-price">${originalPrice}</div>`;
+            }
+            return priceHtml;
+        }
+        return '<div class="price-error">Preço não disponível</div>';
+    }
+
+    formatRatingDisplay(rating, error) {
+        if (rating !== null) {
+            const stars = this.generateStars(rating);
+            return `
+                <span class="stars">${stars}</span>
+                <span class="rating-text">${rating}/5</span>
+            `;
+        }
+        return '<span class="rating-error">Avaliação não disponível</span>';
+    }
+
+    formatReviewsDisplay(reviewCount, error) {
+        if (reviewCount !== null) {
+            return `${this.formatNumber(reviewCount)} avaliações`;
+        }
+        return '<span class="reviews-error">Avaliações não disponíveis</span>';
+    }
+
+    formatImageDisplay(imageUrl, error) {
+        if (imageUrl) {
+            return `<img src="${imageUrl}" alt="Produto" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i><div class=\\'image-error\\'>Imagem não carregada</div>';">`;
+        }
+        return '<i class="fas fa-image"></i><div class="image-error">Imagem não disponível</div>';
     }
 
     generateStars(rating) {
@@ -232,25 +281,28 @@ class AmazonScraperApp {
         this.elements.modalTitle.textContent = 'Detalhes do Produto';
         
         const stars = this.generateStars(product.rating);
+        const priceDisplay = this.formatPriceDisplay(product.price, product.originalPrice);
+        const ratingDisplay = this.formatRatingDisplay(product.rating, product.errors?.rating);
+        const reviewsDisplay = this.formatReviewsDisplay(product.reviewCount, product.errors?.reviewCount);
         
         this.elements.modalContent.innerHTML = `
             <div class="modal-product">
                 <div class="modal-product-image">
-                    ${product.imageUrl ? 
-                        `<img src="${product.imageUrl}" alt="${product.title}">` : 
-                        '<i class="fas fa-image"></i>'
-                    }
+                    ${this.formatImageDisplay(product.imageUrl, product.errors?.imageUrl)}
                 </div>
                 <div class="modal-product-info">
                     <h4>${this.escapeHtml(product.title)}</h4>
                     <div class="modal-product-rating">
-                        <span class="stars">${stars}</span>
-                        <span>${product.rating > 0 ? `${product.rating}/5` : 'Sem avaliação'}</span>
+                        ${ratingDisplay}
                     </div>
-                    <p><strong>Avaliações:</strong> ${product.reviewCount > 0 ? this.formatNumber(product.reviewCount) : 'Sem avaliações'}</p>
-                    ${product.price ? `<p><strong>Preço:</strong> ${product.price}</p>` : ''}
+                    <p><strong>Avaliações:</strong> ${reviewsDisplay}</p>
+                    <div class="modal-product-price">
+                        <strong>Preço:</strong> ${priceDisplay}
+                    </div>
+                    ${product.availability ? `<p><strong>Disponibilidade:</strong> ${product.availability}</p>` : ''}
                     <p><strong>ID:</strong> ${product.id}</p>
                     <p><strong>Data de extração:</strong> ${new Date(product.timestamp).toLocaleString('pt-BR')}</p>
+                    ${product.productUrl ? `<a href="${product.productUrl}" target="_blank" class="modal-product-link">Ver na Amazon</a>` : ''}
                 </div>
             </div>
         `;
